@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "my-fullstack-app-chart.fullname" . }}-frontend
+  labels:
+    {{- include "my-fullstack-app-chart.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.frontend.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "my-fullstack-app-chart.fullname" . }}-frontend
+  template:
+    metadata:
+      labels:
+        app: {{ include "my-fullstack-app-chart.fullname" . }}-frontend
+    spec:
+      serviceAccountName: {{ include "my-fullstack-app-chart.serviceAccountName" . }}
+      containers:
+        - name: frontend
+          image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
+          ports:
+            - containerPort: 80
+          resources: {}
