@@ -8,16 +8,26 @@ spec:
   replicas: {{ .Values.frontend.replicaCount }}
   selector:
     matchLabels:
-      app: {{ include "my-fullstack-app-chart.fullname" . }}-frontend
+      app.kubernetes.io/name: {{ include "my-fullstack-app-chart.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      component: frontend
   template:
     metadata:
       labels:
-        app: {{ include "my-fullstack-app-chart.fullname" . }}-frontend
+        app.kubernetes.io/name: {{ include "my-fullstack-app-chart.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        component: frontend
     spec:
-      serviceAccountName: {{ include "my-fullstack-app-chart.serviceAccountName" . }}
       containers:
         - name: frontend
           image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
           ports:
             - containerPort: 80
-          resources: {}
+          volumeMounts:
+            - name: frontend-config
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: default.conf
+      volumes:
+        - name: frontend-config
+          configMap:
+            name: {{ include "my-fullstack-app-chart.fullname" . }}-frontend-config
